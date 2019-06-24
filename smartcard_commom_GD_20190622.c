@@ -1,6 +1,5 @@
 #include "stm32f10x.h"
 #include "platform_config.h"
-//#include "system_define.h"
 //---------------------------------------------------------------------
 /**************************************/
 typedef unsigned char  uint8;                   /* no sign  8 bit                         */
@@ -21,51 +20,9 @@ typedef unsigned   short word;                   /* no sign  16 bit             
 
 
 #define OK 0
-//#define Parameter_ERR 1
-//#define Off_Power 0x11
 #define Over_Time 0x12
 #define MCRC_ERR  0x13
 #define PPS_ERR  0x14
-//#define PPS_NOT_Support 0x15
-//#define NOT_Support 0x16
-//#define Runtime_Error 0x21
-//#define Function_Err 0x31
-
-//#define GYT_OK	0	//函数调用成功s
-//#define GYT_NOTAG	1	//在操作区域内无卡
-//#define GYT_CRC	2	//卡片CRC错误
-//#define GYT_EMPTY	3	//数值溢出
-//#define GYT_AUTH	4	//验证不成功
-//#define GYT_PARITY	5	//卡片奇偶校验错误
-//#define GYT_CODE	6	//通讯错误
-//#define GYT_SERNR	8	//防冲突过程中读系列号错误
-//#define GYT_NOTAUTH	10	//卡片没有通过验证
-//#define GYT_BITCNT	11	//从卡片接收到的位数错误
-//#define GYT_BYTECNT	12	//从卡片接收到的字节数错误
-//#define GYT_TRANS	14	//调用transfer函数出错
-//#define GYT_WRITE	15	//调用write函数出错
-//#define GYT_INCR	16	//调用increment函数出错
-//#define GYT_DECR	17	//调用decrement函数出错
-//#define GYT_READ	18	//调用read函数出错
-//#define GYT_CMDERR	42	//命令错误
-//#define GYT_WRONG_CMD	100	//未知命令
-
-//#define GYT_SAM_CRC	  50 //CRC错误
-//#define GYT_SAM_OutTime 51	//卡片回复超时
-//#define GYT_SAM_OffPower 52	//卡片未上电
-//#define GYT_SAM_NoRest 	 53	 //卡片未复位
-//#define GYT_SAM_NOTSupport 54  //卡片不支持
-//#define GYT_SAM_OtherErr 55//其他原因
-
-//#define GYT_RF_Anricoll 27
-//#define GYT_RF_OtherErr 28
-//#define GYT_RF_FramingErr 29
-//#define GYT_RF_NeedUIDContiue 30
-//#define GYT_RF_ADPU 31
-//#define GYT_RF_LoadKey 32
-//#define GYT_RF_Restore 33
-
-//#define GYT_FLASH_WR 34
 
 //社保错误代码
 //执行成功
@@ -93,33 +50,6 @@ typedef unsigned   short word;                   /* no sign  16 bit             
 #define IFD_ICC_TSError     		100
 #define IFD_ICC_T0Error     		101
 //--------------状态码--------------------------------------------------------
-/*
-#define MW_OK 0
-#define MW_NOTAG 1
-#define MW_CRC	2
-#define MW_EMPTY 3
-#define MW_AUTH	 4
-#define MW_PARITY 5
-#define MW_CODE	 6
-#define MW_SERNR  8
-#define MW_NOTAUTH 10
-#define MW_BITCNT  11
-#define MW_BYTECNT	12
-#define MW_REQUEST	22
-#define MW_SELECT	23
-#define MW_ANTICOLL	24
-#define MW_READ		 25
-#define MW_WRITE	26
-#define MW_INC	   27
-#define MW_DEC	  28
-#define MW_RESTORE	29
-#define MW_TRANFER	30
-#define MW_LOADKEY	31
-#define MW_CPUERR	32
-#define MW_CMDERR	42
-#define MW_ERR_COM	 43
-#define MW_ERR_COMMAND	44
-*/
 
 //--------卡座序号----------------------------------------
 #define CARD_NONEInsert 0
@@ -229,7 +159,6 @@ typedef unsigned   short word;                   /* no sign  16 bit             
 /***************end**********************/
 #define atr_delayclksum 10800//复位时字符间距，固定9600波特率9600为10752个4MHz时钟
 #define MAX_Card 3
-//#define Card_Use_memorytype 0//0不支持存储卡 1支持存储卡
 //--------------------------------------------------------
 #define error_ok 0
 #define error_p 1
@@ -251,12 +180,9 @@ uint8 USARTDoWith_ByteReceive(uint8 *Data, uint32 TimeOut);//处理超时和重发错误
 #define TIMX_CR1_CEN         ((unsigned short)0x0001)
 
 #define Card_OK OK 
-//#define Card_NoPower Off_Power 
 #define Card_OverTime Over_Time 
 #define Card_CRCERR MCRC_ERR  
 #define Card_PPSERR PPS_ERR  
-//#define Card_PPSNOSupport PPS_NOT_Support 
-//#define Card_NotSupport NOT_Support
 #define Card_I2CERR I2C_ERR
 
 #define Apdu_comm_0 0//CLA+INS+P1+P2
@@ -333,7 +259,6 @@ SC_ATRWord SC_A2RWord;
 
 CARD_Parameter Parameter[MAX_Card];
 volatile uint8 Select_Card_NO;
-//uint8 Card_TypeSave[MAX_Card];
 uint8 Card_TypeSave;
 uint8 Card_RunStatus[MAX_Card];
 
@@ -361,11 +286,9 @@ void SC1_UART_Init(void);
 void SAM_UART_Init(void);
 void SC1_UART_InitAgian(uint8 default_setting);
 void SAM_UART_InitAgian(uint8 default_setting);
-//ErrorStatus USART_ByteReceive(uint8 *Data, uint32 TimeOut);
 void SC_ParityErrorHandler(void);
 void TIM2_Init(uint16 Prescale);
 void TIM2_Start(uint16 delay);
-//uint16 TIM2_Stop(void);
 void TIM2_Close(void);
 int16 SC_USART_SendData(USART_TypeDef* USARTx, uint16 Data);
 void SC_USART_SendData_DoWithErr(USART_TypeDef* USARTx, uint16 Data);
@@ -404,10 +327,6 @@ void IO_SelectCard(uint8 lun)
 GPIO_ResetBits(SAM_SEL_PORT, SAM_SELA_PIN);
 	switch(lun)
 	{
-		
-		//case CARD_FIRST://1
-		//	GPIO_SetBits(SAM_SEL_PORT, SAM_SELA_PIN);
-		//	break;
 		case CARD_SECOND://1
 		break;
 		case CARD_THIRD://2
@@ -1023,14 +942,6 @@ uint8 USARTDoWith_ByteReceive(uint8 *Data, uint32 TimeOut)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-
-//------------v1.25 2009-12-18 edit1:end
-
-/*------------------------------------------------------------------------------
-  Timer4 Update Interrupt Handler  (used for Delay function)
-  Timer4 Update Interrupt happens every 10 ms
- *------------------------------------------------------------------------------*/
-//void TIM2_IRQHandler(void) 
 void TIM2_irq(void)
 {	
   if (TIM2->SR & (1<<0)) 
@@ -1118,7 +1029,6 @@ void Parameter_Init(uint8 SC_Voltagetmp)
 	Parameter[Select_Card_NO].CARD_BWI=4;
 	Parameter[Select_Card_NO].CARD_IFSC=32;
 	delay_Init();
-	//t0_only_atr=1;
 }
 void SC_A2RWord_Init(void)
 {
@@ -1154,7 +1064,7 @@ int16 Card_SelectLun(uint8 lun)
    	switch(Select_Card_NO)
 	{
 		case CARD_FIRST:
-		//	SC1_UART_InitAgain(other_data);	
+	
 		break;
 		case CARD_SECOND:
 		case CARD_THIRD:
